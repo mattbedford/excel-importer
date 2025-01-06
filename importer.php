@@ -22,45 +22,6 @@ class importer {
         }
 
         ?>
-        <style>
-
-        form#excel-import {
-            display:flex;
-            flex-direction:column;
-            width:400px;
-            background: #d8d8d8;
-            padding:40px;
-            border-radius:4px;
-            
-        }
-        form#excel-import label {
-            font-weight:600;
-            color:#222;
-            margin-bottom:20px;
-        }
-        form#excel-import label:nth-of-type(2) {
-            display:flex;
-            padding:10px;
-            line-height:20px;
-            background:#ffffff8a;
-            justify-content:flex-start;
-        }
-        form#excel-import label:nth-of-type(2) input {
-            margin-top:5px;
-            margin-right:10px;
-            color:gray;
-        }
-        form#excel-import button[type="submit"] {
-            background:#222;
-            color:white;
-            width:150px;
-            height:40px;
-            border-radius:3px;
-            cursor:pointer;
-        }
-
-
-        </style>
         <div class="wrap">
             <h3>Importa prodotti</h3>
             <form method="post" enctype="multipart/form-data" id="excel-import">
@@ -117,6 +78,7 @@ class importer {
                     
                     // If we find a sheet called "TU" we label it as "Decoro";
                     // If we find a sheet called "DIGITALE" we label it as "Laminato";
+                    // Any other label will remain unchanged
                     $sheet_label = ($sheetName == "TU") ? "Decoro" : (($sheetName == "DIGITALE") ? "Laminato" : $sheetName);
 
                     $sheetData[$sheet_label] = $spreadsheet->getActiveSheet()->toArray();                
@@ -131,6 +93,7 @@ class importer {
                             $val = strip_tags($sheetData[$i][1]);
                             $flag = strip_tags($sheetLabel);
 
+                            // Jump if row has sheet label in it
                             if ( strtoupper($key) === "LAMINATO" || strtoupper($key) === "DECORO") {
                                 continue;
                             }
@@ -141,6 +104,15 @@ class importer {
                                 'corrispondente' => $val,
                                 'tipologia' => $flag
                             );
+
+                            if(empty($data['corrispondente']) || empty($data['elemento']) || empty($data['tipologia']))
+                            {
+                                echo "Empty or misconfigured data found at row $i. Skipping.";
+                                echo "Found: " . print_r($data, true);
+                                echo "</br>";
+                                continue;
+                            }
+
                             database::insert_data($data);
                         }
                     }

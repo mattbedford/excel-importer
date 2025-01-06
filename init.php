@@ -35,9 +35,6 @@ require_once 'vendor/autoload.php';
 include_once plugin_dir_path( __FILE__ ) . 'importer.php';
 include_once plugin_dir_path( __FILE__ ) . 'database.php';
 
-
-add_action( 'admin_menu', 'ExcelImport\excel_import_menu_page' );
-
 function excel_import_menu_page() {
 
     add_menu_page( 
@@ -52,6 +49,13 @@ function excel_import_menu_page() {
 
 }
 
+function do_excel_admin_style($hook_suffix) {
+    if('toplevel_page_excel-import' === $hook_suffix) {
+        wp_enqueue_style('admin-excel-styles', plugins_url('admin-style.css', __FILE__), array(), '');
+    }
+}
 
+add_action( 'admin_menu', 'ExcelImport\excel_import_menu_page', 10 );
+add_action( 'admin_enqueue_scripts', 'ExcelImport\do_excel_admin_style', 10 );
 // Create new database table on plugin activation
 register_activation_hook( __FILE__, ['ExcelImport\database', 'create_table'] );
